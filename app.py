@@ -1,5 +1,4 @@
 import streamlit as st
-import nltk
 import os
 import textstat
 import spacy
@@ -9,22 +8,32 @@ import pandas as pd
 from sklearn.manifold import TSNE
 from collections import Counter
 from sentence_transformers import SentenceTransformer
+from nltk.tokenize.punkt import PunktSentenceTokenizer
 
 # Set the page configuration
 st.set_page_config(page_title="Authorship Attribution App", layout="wide")
 
-# Define the local path to nltk_data and add it to nltk's data path
+# Ensure nltk_data directory is included and point nltk to it
 nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
-nltk.data.path.append(nltk_data_path)
-
-# Import NLTK tokenizers
-from nltk.tokenize import word_tokenize, sent_tokenize
-
-# Ensure punkt is available at runtime
+st.text(f"Using NLTK data path: {nltk_data_path}")
+if not os.path.exists(nltk_data_path):
+    st.error("NLTK data directory not found.")
+else:
+    # Check and print directory contents for verification
+    st.text("Directory contents:")
+    for root, dirs, files in os.walk(nltk_data_path):
+        st.text(f"ROOT: {root}")
+        st.text(f"DIRS: {dirs}")
+        st.text(f"FILES: {files}")
+        
+# Load punkt tokenizer manually
+punkt_path = os.path.join(nltk_data_path, 'tokenizers/punkt/english.pickle')
 try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    raise RuntimeError("NLTK punkt tokenizer not found. Please ensure nltk_data is in the correct location.")
+    with open(punkt_path, "rb") as f:
+        punkt_tokenizer = PunktSentenceTokenizer(f)
+except FileNotFoundError:
+    st.error("Punkt tokenizer not found. Please ensure it is in the nltk_data directory.")
+    punkt_tokenizer = None
 
 # Load the Spacy model
 try:
@@ -44,17 +53,18 @@ user_input = st.text_area("Enter text for analysis:")
 
 # Extract linguistic features
 def extract_linguistic_features(text):
-    tokens = word_tokenize(text)
-    sentences = sent_tokenize(text)
+    if punkt_tokenizer is None:
+        return {}, {}, {}
+
+    sentences = punkt_tokenizer.tokenize(text)
+    words = [word for sentence in sentences for word in sentence.split()]
+    unique_words = set(words)
 
     if nlp is not None:
         doc = nlp(text)
         pos_counts = Counter(token.pos_ for token in doc)
     else:
         pos_counts = {}
-
-    words = [token for token in tokens if token.isalpha()]
-    unique_words = set(words)
 
     lexical_features = {
         "Word Count": len(words),
@@ -64,10 +74,10 @@ def extract_linguistic_features(text):
     }
 
     syntactic_features = {
-        "Avg Sentence Length": len(tokens) / len(sentences) if sentences else 0,
-        "Noun Usage": pos_counts.get('NOUN', 0) / len(tokens) if len(tokens) > 0 else 0,
-        "Verb Usage": pos_counts.get('VERB', 0) / len(tokens) if len(tokens) > 0 else 0,
-        "Adj Usage": pos_counts.get('ADJ', 0) / len(tokens) if len(tokens) > 0 else 0,
+        "Avg Sentence Length": len(words) / len(sentences) if sentences else 0,
+        "Noun Usage": pos_counts.get('NOUN', 0) / len(words) if len(words) > 0 else 0,
+        "Verb Usage": pos_counts.get('VERB', 0) / len(words) if len(words) > 0 else 0,
+        "Adj Usage": pos_counts.get('ADJ', 0) / len(words) if len(words) > 0 else 0,
     }
 
     readability_metrics = {
