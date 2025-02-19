@@ -20,12 +20,7 @@ import os
 try:
     nltk.data.find("tokenizers/punkt")
 except LookupError:
-    nltk.download("punkt")
-
-# Ensure NLTK's Punkt tokenizer is installed
-punkt_path = os.path.join(nltk.data.find("tokenizers"), "punkt")
-if not os.path.exists(punkt_path):
-    nltk.download('punkt')
+    nltk.download("punkt", quiet=True)
 
 # Load NLP models
 import spacy
