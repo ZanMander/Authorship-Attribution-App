@@ -13,11 +13,23 @@ import os
 
 # Ensure necessary models are downloaded
 os.system("python -m spacy download en_core_web_sm")
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
+import nltk.data
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
 
 # Load NLP models
-nlp = spacy.load("en_core_web_sm")
+import spacy
+import subprocess
+
+# Ensure the Spacy model is installed
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+    nlp = spacy.load("en_core_web_sm")
+
 embedding_model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
 
 # Streamlit App UI
