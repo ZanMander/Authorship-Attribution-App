@@ -10,23 +10,20 @@ from sklearn.manifold import TSNE
 from collections import Counter
 from nltk.tokenize import word_tokenize, sent_tokenize
 from sentence_transformers import SentenceTransformer
+import subprocess
 
-import nltk
-import os
-
-# ✅ Ensure that the NLTK tokenizer is installed **before using it**
+# ✅ Ensure that NLTK's tokenizer is installed before using it
 try:
     nltk.data.find("tokenizers/punkt")
 except LookupError:
     nltk.download("punkt", quiet=True)
-    nltk.data.find("tokenizers/punkt") 
 
-# ✅ Ensure Spacy model is installed
+# ✅ Ensure that Spacy model is installed before loading
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
-    os.system("python -m spacy download en_core_web_sm")
-    nlp = spacy.load("en_core_web_sm")
+    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"], check=True)
+    nlp = spacy.load("en_core_web_sm")  # Reload model after installation
 
 # ✅ Load sentence transformer model for embeddings
 embedding_model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
