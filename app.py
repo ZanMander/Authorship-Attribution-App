@@ -10,7 +10,6 @@ from sklearn.manifold import TSNE
 from collections import Counter
 from nltk.tokenize import word_tokenize, sent_tokenize
 from sentence_transformers import SentenceTransformer
-import subprocess
 
 # ✅ Ensure that NLTK's tokenizer is installed before using it
 try:
@@ -18,12 +17,12 @@ try:
 except LookupError:
     nltk.download("punkt", quiet=True)
 
-# ✅ Ensure that Spacy model is installed before loading
+# ✅ Load Spacy model (assumed pre-installed via requirements.txt)
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
-    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"], check=True)
-    nlp = spacy.load("en_core_web_sm")  # Reload model after installation
+    st.error("Spacy model 'en_core_web_sm' is missing. Please check the installation.")
+    nlp = None  # Prevents the app from crashing
 
 # ✅ Load sentence transformer model for embeddings
 embedding_model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
@@ -40,7 +39,13 @@ user_input = st.text_area("Enter text for analysis:")
 def extract_linguistic_features(text):
     tokens = word_tokenize(text)
     sentences = sent_tokenize(text)
-    doc = nlp(text)
+    
+    # Check if Spacy is loaded before processing
+    if nlp is not None:
+        doc = nlp(text)
+        pos_counts = Counter(token.pos_ for token in doc)
+    else:
+        pos_counts = {}
 
     words = [token for token in tokens if token.isalpha()]
     unique_words = set(words)
@@ -52,7 +57,6 @@ def extract_linguistic_features(text):
         "Type-Token Ratio (TTR)": len(unique_words) / len(words) if words else 0
     }
 
-    pos_counts = Counter(token.pos_ for token in doc)
     syntactic_features = {
         "Avg Sentence Length": len(tokens) / len(sentences) if sentences else 0,
         "Noun Usage": pos_counts.get('NOUN', 0) / len(tokens) if len(tokens) > 0 else 0,
