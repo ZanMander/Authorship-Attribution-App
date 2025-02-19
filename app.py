@@ -17,6 +17,12 @@ import nltk.data
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
+import nltk.data
+import os
+
+# Ensure NLTK's Punkt tokenizer is installed
+punkt_path = os.path.join(nltk.data.find("tokenizers"), "punkt")
+if not os.path.exists(punkt_path):
     nltk.download('punkt')
 
 # Load NLP models
