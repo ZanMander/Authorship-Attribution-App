@@ -1,5 +1,6 @@
 import streamlit as st
 import nltk
+import os
 import textstat
 import spacy
 import matplotlib.pyplot as plt
@@ -7,8 +8,18 @@ import numpy as np
 import pandas as pd
 from sklearn.manifold import TSNE
 from collections import Counter
-from nltk.tokenize import word_tokenize, sent_tokenize
 from sentence_transformers import SentenceTransformer
+
+# ✅ Set up a persistent download inside Streamlit cache
+@st.cache_resource
+def load_nltk_resources():
+    nltk.download("punkt", quiet=True)
+    return True  # Just a dummy return value to make sure caching works
+
+# ✅ Call the function to ensure `punkt` is always available
+load_nltk_resources()
+
+from nltk.tokenize import word_tokenize, sent_tokenize
 
 # ✅ Load Spacy model (pre-installed via requirements.txt)
 try:
