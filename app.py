@@ -13,13 +13,19 @@ from sentence_transformers import SentenceTransformer
 # ✅ This must be the FIRST Streamlit command
 st.set_page_config(page_title="Authorship Attribution App", layout="wide")
 
-# ✅ Ensure nltk punkt is installed (cached for persistence)
+# ✅ Force a fixed NLTK data directory (inside the app)
+NLTK_DATA_PATH = os.path.join(os.path.dirname(__file__), "nltk_data")
+os.makedirs(NLTK_DATA_PATH, exist_ok=True)  # Ensure directory exists
+nltk.data.path.append(NLTK_DATA_PATH)  # Force NLTK to use this directory
+
+# ✅ Ensure `punkt` is downloaded every time the app runs
 @st.cache_resource
-def load_nltk_resources():
-    nltk.download("punkt", quiet=True)
+def download_nltk_resources():
+    nltk.download("punkt", download_dir=NLTK_DATA_PATH, quiet=True)
+    nltk.data.path.append(NLTK_DATA_PATH)
     return True
 
-load_nltk_resources()
+download_nltk_resources()
 
 from nltk.tokenize import word_tokenize, sent_tokenize
 
