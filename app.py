@@ -1,43 +1,35 @@
 import streamlit as st
-from sentence_transformers import SentenceTransformer, util
-import spacy
 import nltk
+import os
 import textstat
+import spacy
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
+import pandas as pd
 from sklearn.manifold import TSNE
 from collections import Counter
-import re
-import os
+from nltk.tokenize import word_tokenize, sent_tokenize
+from sentence_transformers import SentenceTransformer
 
-# Ensure necessary models are downloaded
-os.system("python -m spacy download en_core_web_sm")
-import nltk
-import os
-
-# Define a persistent directory for NLTK data
+# ✅ Define a persistent NLTK download directory
 NLTK_DATA_PATH = os.path.join(os.getcwd(), "nltk_data")
 os.makedirs(NLTK_DATA_PATH, exist_ok=True)
 nltk.data.path.append(NLTK_DATA_PATH)
 
-# Ensure NLTK's Punkt tokenizer is installed
+# ✅ Ensure that the NLTK tokenizer is downloaded
 try:
     nltk.data.find("tokenizers/punkt")
 except LookupError:
     nltk.download("punkt", download_dir=NLTK_DATA_PATH, quiet=True)
 
-# Load NLP models
-import spacy
-import subprocess
-
-# Ensure the Spacy model is installed
+# ✅ Ensure that Spacy's language model is installed
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
-    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+    os.system("python -m spacy download en_core_web_sm")
     nlp = spacy.load("en_core_web_sm")
 
+# ✅ Load sentence transformer model for embeddings
 embedding_model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
 
 # Streamlit App UI
@@ -45,13 +37,13 @@ st.set_page_config(page_title="Authorship Attribution App", layout="wide")
 st.title("Authorship Attribution System")
 st.write("Analyze linguistic features and stylometry for authorship identification.")
 
-# User input
+# ✅ User input
 user_input = st.text_area("Enter text for analysis:")
 
-# Function to extract linguistic features
+# ✅ Function to extract linguistic features
 def extract_linguistic_features(text):
-    tokens = nltk.word_tokenize(text)
-    sentences = nltk.sent_tokenize(text)
+    tokens = word_tokenize(text)
+    sentences = sent_tokenize(text)
     doc = nlp(text)
 
     words = [token for token in tokens if token.isalpha()]
@@ -80,13 +72,13 @@ def extract_linguistic_features(text):
 
     return lexical_features, syntactic_features, readability_metrics
 
-# Function to compute word embeddings
+# ✅ Function to compute word embeddings
 def get_word_embeddings(text):
     words = text.split()
     embeddings = embedding_model.encode(words)
     return words, embeddings
 
-# Function to create a t-SNE visualization
+# ✅ Function to create a t-SNE visualization
 def tsne_visualization(words, embeddings):
     tsne = TSNE(n_components=2, random_state=42)
     reduced_embeddings = tsne.fit_transform(embeddings)
@@ -101,7 +93,7 @@ def tsne_visualization(words, embeddings):
 
     return fig
 
-# Process analysis when user submits text
+# ✅ Process analysis when user submits text
 if st.button("Analyze") or user_input:
     if user_input:
         # Extract linguistic features
