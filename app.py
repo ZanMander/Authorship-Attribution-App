@@ -13,18 +13,19 @@ import os
 
 # Ensure necessary models are downloaded
 os.system("python -m spacy download en_core_web_sm")
-import nltk.data
+import nltk
 import os
 
-# Ensure NLTK's Punkt tokenizer is installed
-nltk_data_path = os.path.join(os.path.expanduser("~"), "nltk_data")
-if not os.path.exists(nltk_data_path):
-    os.makedirs(nltk_data_path)
+# Define a persistent directory for NLTK data
+NLTK_DATA_PATH = os.path.join(os.getcwd(), "nltk_data")
+os.makedirs(NLTK_DATA_PATH, exist_ok=True)
+nltk.data.path.append(NLTK_DATA_PATH)
 
+# Ensure NLTK's Punkt tokenizer is installed
 try:
     nltk.data.find("tokenizers/punkt")
 except LookupError:
-    nltk.download("punkt", download_dir=nltk_data_path, quiet=True)
+    nltk.download("punkt", download_dir=NLTK_DATA_PATH, quiet=True)
 
 # Load NLP models
 import spacy
