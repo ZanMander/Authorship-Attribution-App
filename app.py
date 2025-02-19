@@ -1,6 +1,5 @@
 import streamlit as st
 import nltk
-import os
 import textstat
 import spacy
 import matplotlib.pyplot as plt
@@ -11,23 +10,17 @@ from collections import Counter
 from nltk.tokenize import word_tokenize, sent_tokenize
 from sentence_transformers import SentenceTransformer
 
-# ✅ Ensure that NLTK's tokenizer is installed before using it
-try:
-    nltk.data.find("tokenizers/punkt")
-except LookupError:
-    nltk.download("punkt", quiet=True)
-
-# ✅ Load Spacy model (assumed pre-installed via requirements.txt)
+# ✅ Load Spacy model (pre-installed via requirements.txt)
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
     st.error("Spacy model 'en_core_web_sm' is missing. Please check the installation.")
     nlp = None  # Prevents the app from crashing
 
-# ✅ Load sentence transformer model for embeddings
+# ✅ Load Sentence Transformer for word embeddings
 embedding_model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
 
-# Streamlit App UI
+# Streamlit UI
 st.set_page_config(page_title="Authorship Attribution App", layout="wide")
 st.title("Authorship Attribution System")
 st.write("Analyze linguistic features and stylometry for authorship identification.")
@@ -40,7 +33,6 @@ def extract_linguistic_features(text):
     tokens = word_tokenize(text)
     sentences = sent_tokenize(text)
     
-    # Check if Spacy is loaded before processing
     if nlp is not None:
         doc = nlp(text)
         pos_counts = Counter(token.pos_ for token in doc)
