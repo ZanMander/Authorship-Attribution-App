@@ -8,41 +8,18 @@ import pandas as pd
 from sklearn.manifold import TSNE
 from collections import Counter
 from sentence_transformers import SentenceTransformer
-from nltk.tokenize.punkt import PunktSentenceTokenizer
 
 # Set the page configuration
 st.set_page_config(page_title="Authorship Attribution App", layout="wide")
 
-# Ensure nltk_data directory is included and point nltk to it
-nltk_data_path = os.path.join(os.path.dirname(__file__), 'nltk_data')
-st.text(f"Using NLTK data path: {nltk_data_path}")
-if not os.path.exists(nltk_data_path):
-    st.error("NLTK data directory not found.")
-else:
-    # Check and print directory contents for verification
-    st.text("Directory contents:")
-    for root, dirs, files in os.walk(nltk_data_path):
-        st.text(f"ROOT: {root}")
-        st.text(f"DIRS: {dirs}")
-        st.text(f"FILES: {files}")
-        
-# Load punkt tokenizer manually
-punkt_path = os.path.join(nltk_data_path, 'tokenizers/punkt/english.pickle')
-try:
-    with open(punkt_path, "rb") as f:
-        punkt_tokenizer = PunktSentenceTokenizer(f)
-except FileNotFoundError:
-    st.error("Punkt tokenizer not found. Please ensure it is in the nltk_data directory.")
-    punkt_tokenizer = None
-
-# Load the Spacy model
+# Load Spacy model
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
     st.error("Spacy model 'en_core_web_sm' is missing. Please check the installation.")
     nlp = None
 
-# Load the Sentence Transformer model
+# Load Sentence Transformer model
 embedding_model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
 
 # Streamlit UI setup
@@ -51,20 +28,18 @@ st.write("Analyze linguistic features and stylometry for authorship identificati
 
 user_input = st.text_area("Enter text for analysis:")
 
-# Extract linguistic features
+# Extract linguistic features using Spacy tokenizer as a fallback
 def extract_linguistic_features(text):
-    if punkt_tokenizer is None:
-        return {}, {}, {}
-
-    sentences = punkt_tokenizer.tokenize(text)
-    words = [word for sentence in sentences for word in sentence.split()]
-    unique_words = set(words)
-
     if nlp is not None:
         doc = nlp(text)
+        sentences = [sent.text for sent in doc.sents]
         pos_counts = Counter(token.pos_ for token in doc)
     else:
+        sentences = text.split(".")  # Basic fallback tokenization if Spacy is unavailable
         pos_counts = {}
+
+    words = [token.text for token in doc if token.is_alpha] if nlp else text.split()
+    unique_words = set(words)
 
     lexical_features = {
         "Word Count": len(words),
