@@ -11,11 +11,15 @@ from collections import Counter
 from nltk.tokenize import word_tokenize, sent_tokenize
 from sentence_transformers import SentenceTransformer
 
-# ✅ Ensure NLTK's tokenizer is installed in the default system path
+import nltk
+import os
+
+# ✅ Ensure that the NLTK tokenizer is installed **before using it**
 try:
     nltk.data.find("tokenizers/punkt")
 except LookupError:
     nltk.download("punkt", quiet=True)
+    nltk.data.find("tokenizers/punkt") 
 
 # ✅ Ensure Spacy model is installed
 try:
