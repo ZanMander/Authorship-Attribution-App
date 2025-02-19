@@ -10,12 +10,12 @@ from sklearn.manifold import TSNE
 from collections import Counter
 from sentence_transformers import SentenceTransformer
 
-# ✅ This must be the FIRST Streamlit command
+# ✅ Set the first Streamlit command
 st.set_page_config(page_title="Authorship Attribution App", layout="wide")
 
-# ✅ Force NLTK to use the system-installed directory
-NLTK_DATA_PATH = "/usr/local/nltk_data"
-nltk.data.path.append(NLTK_DATA_PATH)
+# ✅ Force NLTK to use local `nltk_data/`
+NLTK_DATA_PATH = os.path.join(os.path.dirname(__file__), "nltk_data")
+nltk.data.path.append(NLTK_DATA_PATH)  # ✅ Forces NLTK to load from here
 
 from nltk.tokenize import word_tokenize, sent_tokenize
 
@@ -24,7 +24,7 @@ try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
     st.error("Spacy model 'en_core_web_sm' is missing. Please check the installation.")
-    nlp = None
+    nlp = None  # Prevents the app from crashing
 
 # ✅ Load Sentence Transformer for word embeddings
 embedding_model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
