@@ -11,18 +11,13 @@ from collections import Counter
 from nltk.tokenize import word_tokenize, sent_tokenize
 from sentence_transformers import SentenceTransformer
 
-# ✅ Define a persistent NLTK download directory
-NLTK_DATA_PATH = os.path.join(os.getcwd(), "nltk_data")
-os.makedirs(NLTK_DATA_PATH, exist_ok=True)
-nltk.data.path.append(NLTK_DATA_PATH)
-
-# ✅ Ensure that the NLTK tokenizer is downloaded
+# ✅ Ensure NLTK's tokenizer is installed in the default system path
 try:
     nltk.data.find("tokenizers/punkt")
 except LookupError:
-    nltk.download("punkt", download_dir=NLTK_DATA_PATH, quiet=True)
+    nltk.download("punkt", quiet=True)
 
-# ✅ Ensure that Spacy's language model is installed
+# ✅ Ensure Spacy model is installed
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
@@ -59,9 +54,9 @@ def extract_linguistic_features(text):
     pos_counts = Counter(token.pos_ for token in doc)
     syntactic_features = {
         "Avg Sentence Length": len(tokens) / len(sentences) if sentences else 0,
-        "Noun Usage": pos_counts['NOUN'] / len(tokens) if len(tokens) > 0 else 0,
-        "Verb Usage": pos_counts['VERB'] / len(tokens) if len(tokens) > 0 else 0,
-        "Adj Usage": pos_counts['ADJ'] / len(tokens) if len(tokens) > 0 else 0,
+        "Noun Usage": pos_counts.get('NOUN', 0) / len(tokens) if len(tokens) > 0 else 0,
+        "Verb Usage": pos_counts.get('VERB', 0) / len(tokens) if len(tokens) > 0 else 0,
+        "Adj Usage": pos_counts.get('ADJ', 0) / len(tokens) if len(tokens) > 0 else 0,
     }
 
     readability_metrics = {
