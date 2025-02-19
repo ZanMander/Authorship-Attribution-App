@@ -14,11 +14,13 @@ import os
 # Ensure necessary models are downloaded
 os.system("python -m spacy download en_core_web_sm")
 import nltk.data
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-import nltk.data
 import os
+
+# Ensure NLTK's Punkt tokenizer is installed
+try:
+    nltk.data.find("tokenizers/punkt")
+except LookupError:
+    nltk.download("punkt")
 
 # Ensure NLTK's Punkt tokenizer is installed
 punkt_path = os.path.join(nltk.data.find("tokenizers"), "punkt")
