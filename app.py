@@ -17,10 +17,14 @@ import nltk.data
 import os
 
 # Ensure NLTK's Punkt tokenizer is installed
+nltk_data_path = os.path.join(os.path.expanduser("~"), "nltk_data")
+if not os.path.exists(nltk_data_path):
+    os.makedirs(nltk_data_path)
+
 try:
     nltk.data.find("tokenizers/punkt")
 except LookupError:
-    nltk.download("punkt", quiet=True)
+    nltk.download("punkt", download_dir=nltk_data_path, quiet=True)
 
 # Load NLP models
 import spacy
