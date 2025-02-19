@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st  # ✅ First import
 import nltk
 import os
 import textstat
@@ -10,13 +10,15 @@ from sklearn.manifold import TSNE
 from collections import Counter
 from sentence_transformers import SentenceTransformer
 
-# ✅ Set up a persistent download inside Streamlit cache
+# ✅ This must be the FIRST Streamlit command
+st.set_page_config(page_title="Authorship Attribution App", layout="wide")
+
+# ✅ Ensure nltk punkt is installed (cached for persistence)
 @st.cache_resource
 def load_nltk_resources():
     nltk.download("punkt", quiet=True)
-    return True  # Just a dummy return value to make sure caching works
+    return True
 
-# ✅ Call the function to ensure `punkt` is always available
 load_nltk_resources()
 
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -26,13 +28,12 @@ try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
     st.error("Spacy model 'en_core_web_sm' is missing. Please check the installation.")
-    nlp = None  # Prevents the app from crashing
+    nlp = None
 
 # ✅ Load Sentence Transformer for word embeddings
 embedding_model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
 
 # Streamlit UI
-st.set_page_config(page_title="Authorship Attribution App", layout="wide")
 st.title("Authorship Attribution System")
 st.write("Analyze linguistic features and stylometry for authorship identification.")
 
